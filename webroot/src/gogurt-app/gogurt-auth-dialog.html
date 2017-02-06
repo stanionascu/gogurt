@@ -1,0 +1,81 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+
+<link rel="import" href="gogurt-app-data.html">
+
+<dom-module id="gogurt-auth-dialog">
+  <template>
+    <style>
+      .alert-error {
+        background: #ffcdd2;
+        border: 1px solid #f44336;
+        border-radius: 3px;
+        color: #333;
+        font-size: 14px;
+        padding: 10px;
+      }
+    </style>
+    <gogurt-app-data key="userInfoData" data="{{userInfo}}"></gogurt-app-data>
+    <iron-ajax auto method="get" url="/token" handle-as="json"
+      headers$='{"Authorization": "[[userInfo.token]]"}'
+      on-error="_badToken"></iron-ajax>
+    <form is="iron-form" on-iron-form-response="_responseHandler" on-iron-form-error="_responseError" id="loginForm" method="post" action="/login">
+    <paper-dialog id="dialog" modal style="width: 500px; padding: 20px;">
+      <h2>Login</h2>
+      <template is="dom-if" if="[[error]]">
+          <p class="alert-error"><strong>Error:</strong> [[error]]</p>
+      </template>
+      <paper-dialog-scrollable>
+          <paper-input name="login" label="Login" required></paper-input>
+          <paper-input id="password" name="password" label="Password" type="password" required></paper-input>
+      </paper-dialog-scrollable>
+      <div class="buttons">
+        <paper-button id="loginButton" autofocus raised>Login</paper-button>
+      </div>
+    </paper-dialog>
+    </form>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'gogurt-auth-dialog',
+      listeners: {
+        "loginButton.click": "_submitForm",
+      },
+      properties: {
+        userInfo: Object
+      },
+      open: function(e) {
+        this.$.dialog.open();
+      },
+      _submitForm: function(e) {
+        document.getElementById("loginForm").submit();
+      },
+      _badToken: function(e) {
+        if (this.userInfo && this.userInfo.token) {
+          this.error = "Authorization expired.";
+          this.set("userInfo.loggedIn", false);
+        }
+        this.open();
+      },
+      _responseHandler: function(e) {
+        var response = e.detail.parseResponse();
+        if (response.token) {
+          var app = document.querySelector("gogurt-app");
+          app.set("userInfo", { token: response.token, loggedIn: true });
+          this.$.dialog.close();
+          this.error = "";
+        }
+      },
+      _responseError: function(e) {
+        this.error = e.detail.request.xhr.response.status;
+        this.$.password.value = "";
+      },
+    });
+  </script>
+</dom-module>

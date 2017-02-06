@@ -1,0 +1,77 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+
+<link rel="import" href="gogurt-list.html">
+<link rel="import" href="gogurt-add-dialog.html">
+<link rel="import" href="gogurt-confirm-dialog.html">
+<link rel="import" href="gogurt-auth-dialog.html">
+<link rel="import" href="gogurt-app-data.html">
+
+<dom-module id="gogurt-app">
+  <template>
+    <style>
+      app-header {
+        background-color: #23a;
+        color: #fff;
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+      #addButton {
+        position: absolute;
+        top: calc(64px - 28px);
+        right: 24px;
+        z-index: 1;
+        transition: top 0.18s ease-in;
+      }
+    </style>
+    <iron-localstorage name="userInfoStorage" value="{{userInfo}}" on-iron-localstorage-load-empty="initializeEmptyUserInfo"></iron-localstorage>
+    <gogurt-app-data key="userInfoData" data="{{userInfo}}"></gogurt-app-data>
+    <div hidden$="[[!userInfo.loggedIn]]">
+      <app-header reveals effects="waterfall">
+        <app-toolbar>
+          <div main-title>Gogurt</div>
+          <paper-icon-button icon="av:play-arrow" on-tap="startOrStopSelected"></paper-icon-button>
+          <paper-icon-button icon="delete" on-tap="eraseSelected"></paper-icon-button>
+          <paper-icon-button icon="add" onclick="addDialog.open()"></paper-icon-button>
+        </app-toolbar>
+      </app-header>
+      <gogurt-list id="list"></gogurt-list>
+      <gogurt-add-dialog id="addDialog"></gogurt-add-dialog>
+      <gogurt-confirm-dialog id="confirmDialog"></gogurt-confirm-dialog>
+    </div>
+    <gogurt-auth-dialog id="authDialog"></gogurt-auth-dialog>
+    <paper-toast id="toast" text="Added successfuly to the queue."></paper-toast>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'gogurt-app',
+      properties: { userInfo: Object },
+      initializeEmptyUserInfo: function() {
+        this.userInfo = { token: "", loggedIn: false };
+      },
+      eraseSelected: function(e) {
+        this.$.list.eraseSelected();
+      },
+      startOrStopSelected: function(e) {
+        this.$.list.startOrStopSelected();
+      }
+    });
+  </script>
+
+</dom-module>

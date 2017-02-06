@@ -1,0 +1,177 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/av-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/device-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/notification-icons.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+
+<link rel="import" href="gogurt-app-data.html">
+<link rel="import" href="gogurt-list-body.html">
+
+<dom-module id="gogurt-list">
+  <template>
+    <style is="custom-style">
+      app-toolbar.tall {
+        height: 148px;
+      }
+      #torrents {
+        padding-top: 0px;
+        margin-top: 0px;
+        padding-bottom: 16px;
+        table-layout: fixed;
+        font-size: 12px;
+        width: 100%;
+        background: white;
+      }
+      #torrents tr {
+        text-align: middle;
+        vertical-align: middle;
+        align-content: center;
+        overflow: hidden;
+        cursor: default;
+      }
+      #torrents paper-progress {
+        width: 100px;
+      }
+      .title {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        text-align: middle;
+        white-space: nowrap;
+        display: block;
+        width: 100%;
+      }
+      .align-left {
+        text-align: right;
+      }
+      .iron-selected {
+        background: #eee;
+      }
+    </style>
+    <gogurt-app-data key="userInfoData" data="{{userInfo}}"></gogurt-app-data>
+    <iron-ajax auto id="list" url="/api/list/main" last-response="{{itemData}}" 
+        on-response="_onResponse" on-error="_onResponseError" handleAs="json"
+        headers$='{"Authorization": "[[userInfo.token]]"}'></iron-ajax>
+    <table id="torrents" cellspacing=0>
+      <colgroup>
+        <col width="100%"/>
+        <col width="100px"/>
+        <col width="170px"/>
+        <col width="120px"/>
+        <col width="120px"/>
+        <col width="120px"/>
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Progress</th>
+          <th>Size</th>
+          <th>Uploaded</th>
+          <th>Up</th>
+          <th>Down</th>
+        </tr>
+      </thead>
+      <tbody is="gogurt-list-body" on-iron-select="_itemSelected">
+        <template is="dom-repeat" items="{{itemData}}" as="item">
+        <tr style="width: 100%;">
+          <td nowrap><span class="title">[[item.Name]]</span></td>
+          <td nowrap><paper-progress value="[[_percentage(item.CompletedBytes, item.TotalSizeInBytes)]]"></paper-progress>[[_percentage(item.CompletedBytes, item.TotalSizeInBytes)]]%</td>
+          <td nowrap class="align-left">[[_formatSizeUnits(item.CompletedBytes)]]/[[_formatSizeUnits(item.TotalSizeInBytes)]] <iron-icon icon="device:storage"></iron-icon></td>
+          <td nowrap class="align-left">[[_formatSizeUnits(item.TotalUploadedBytes)]] <iron-icon icon="cloud-upload"></iron-icon></td>
+          <td nowrap class="align-left" style="color: #117">[[_formatSizeUnits(item.UpRate)]]/s <iron-icon icon="arrow-upward"></iron-icon></td>
+          <td nowrap class="align-left" style="color: #171">[[_formatSizeUnits(item.DownRate)]]/s <iron-icon icon="arrow-downward"></iron-icon></td>
+        </tr>
+        </template>
+      </tbody>
+    </table>
+    <iron-ajax id="itemXhr" headers$='{"Authorization": "[[userInfo.token]]"}'></iron-ajax>
+  </template>
+
+  <script>
+      Polymer({
+        is: "gogurt-list",
+        properties: {
+          userInfo: Object,
+          selectedIndex: Number
+        },
+        ready: function() {
+          if (this.userInfo && this.userInfo.loggedIn) {
+            this.$.list.generateRequest();
+          }
+        },
+        _updateData: function () {
+          this.async(function () {
+            if (this.userInfo && this.userInfo.loggedIn) {
+              this.$.list.generateRequest();
+            }
+          }, 1000);
+        },
+        _onResponse: function () {
+          this._updateData();
+        },
+        _onResponseError: function(e) {
+          var toast = document.querySelector("#toast");
+          toast.text = "Error occured while fetching the list";
+          toast.open();
+        },
+        _formatSizeUnits: function(bytes){
+          var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+          if (bytes == 0) {
+            return '0 B';
+          }
+          var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+          return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+        },
+        _percentage: function(value, total) {
+          return ((value/total) * 100.0).toFixed(2);
+        },
+        _compare: function(a, b) {
+          if (a.Name < b.Name)
+            return -1;
+          else if (a.Name > b.Name)
+            return 1;
+          return 0;
+        },
+        eraseSelected: function(e) {
+          var dialog = document.querySelector("#confirmDialog");
+          var toast = document.querySelector("#toast");
+          var item = this.itemData[this.selectedIndex];
+          dialog.Text = "Really remove " + item.Name + "?";
+          dialog.open();
+
+          var xhr = this.$.itemXhr;
+          dialog.dismissDialog = function(e) {
+            if (e.detail.confirmed) {
+              xhr.method = "DELETE";
+              xhr.url = "/" + item.Hash;
+              xhr.generateRequest();
+              // todo: some error checking
+              toast.text = item.Name + " removed";
+              toast.open();
+            }
+          }
+        },
+        startOrStopSelected: function(e) {
+          var item = this.itemData[this.selectedIndex];
+          var toast = document.querySelector("#toast");
+          var xhr = this.$.itemXhr;
+
+          xhr.method = "OPTIONS";
+          if (item.State == 1) {
+            xhr.url = "/" + item.Hash + "/stop";
+            toast.text = item.Name + " stopped";
+          } else {
+            xhr.url = "/" + item.Hash + "/start";
+            toast.text = item.Name + " started";
+          }
+          xhr.generateRequest();
+          toast.open();
+        },
+        _itemSelected: function(e, detail) {
+          this.selectedIndex = detail.item.rowIndex - 1;
+        }
+      });
+  </script>
+</dom-module>

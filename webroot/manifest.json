@@ -1,0 +1,10 @@
+{
+  "name": "gogurt",
+  "short_name": "gogurt",
+  "description": "Simple responsive rtorrent webgui",
+  "start_url": "/ui",
+  "display": "standalone",
+  "fragments": [
+    "ui/src/gogurt-app/*.html"
+  ]
+}

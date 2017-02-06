@@ -1,0 +1,35 @@
+{
+  "name": "gogurt",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "^1.8.0",
+    "iron-list": "polymerElements/iron-list#^1.4.1",
+    "app-layout": "polymerElements/app-layout#^0.10.7",
+    "paper-fab": "polymerElements/paper-fab#^1.2.1",
+    "paper-dialog": "polymerElements/paper-dialog#^1.1.0",
+    "iron-ajax": "polymerElements/iron-ajax#^1.4.3",
+    "paper-progress": "polymerElements/paper-progress#^1.0.11",
+    "iron-icon": "polymerElements/iron-icon#^1.0.12",
+    "paper-icon-button": "polymerElements/paper-icon-button#^1.1.4",
+    "paper-input": "polymerElements/paper-input#^1.1.23",
+    "paper-item": "polymerElements/paper-item#^1.2.1",
+    "paper-toast": "polymerElements/paper-toast#^1.3.0",
+    "iron-icons": "polymerElements/iron-icons#^1.2.0",
+    "iron-localstorage": "polymerElements/iron-localstorage#^1.0.6",
+    "iron-image": "polymerElements/iron-image#^1.2.5",
+    "paper-button": "polymerElements/paper-button#^1.0.14",
+    "paper-menu": "polymerElements/paper-menu#^1.2.2",
+    "iron-form": "polymerElements/iron-form#^1.1.4",
+    "iron-selector": "polymerElements/iron-selector#^1.5.2"
+  }
+}

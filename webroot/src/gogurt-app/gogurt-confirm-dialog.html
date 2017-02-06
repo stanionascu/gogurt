@@ -1,0 +1,32 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+
+<dom-module id="gogurt-confirm-dialog">
+  <template>
+    <paper-dialog id="dialog" modal style="padding: 20px;" auto-fit-on-attach on-iron-overlay-closed="dismissDialog">
+      <h2>Are you sure?</h2>
+      <p>[[Text]]</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss autofocus>No</paper-button>
+        <paper-button dialog-confirm>Yes</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'gogurt-confirm-dialog',
+      properties: {
+        Hash: String,
+        Action: String
+      },
+      open: function(e) {
+        this.$.dialog.open();
+      },
+    });
+  </script>
+</dom-module>
