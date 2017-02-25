@@ -2,9 +2,6 @@
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/iron-form/iron-form.html">
-<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="gogurt-app-data.html">
 
@@ -14,17 +11,13 @@
     <paper-dialog id="dialog" modal style="width: 500px; padding: 20px;">
       <h2>Add</h2>
       <paper-dialog-scrollable>
-        <form is="iron-form" id="form" method="put" on-iron-form-presubmit="submitForm" action="/api/add/new">
-          <input type="file" id="fileInput" on-change="fileChange" hidden>
-          <paper-input id="fileDisplay" label="File" readonly>
-            <paper-button suffix onclick="fileInput.click()">Choose</paper-button>
-          </paper-input>
-          <paper-input id="fileTag" label="Tag"></paper-input>
-        </form>
+        <input type="file" id="fileInput" on-change="fileChange" hidden>
+        <paper-input id="fileDisplay" label="File" readonly on-tap="_selectFile"></paper-input>
+        <paper-input id="fileTag" label="Tag"></paper-input>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button dialog-dismiss onclick="form.reset();">Cancel</paper-button>
-        <paper-button dialog-confirm autofocus onclick="form.submit(); form.reset();">Add</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus on-tap="submitForm">Add</paper-button>
       </div>
     </paper-dialog>
   </template>
@@ -39,6 +32,9 @@
       open: function(e) {
         this.$.dialog.open();
       },
+      _selectFile: function(e) {
+        this.$.fileInput.click();
+      },
       fileChange: function(e) {
         if (this.$.fileInput.files.length > 0) {
           this.$.fileDisplay.value = this.$.fileInput.files[0].name;
@@ -47,20 +43,17 @@
         }
       },
       submitForm: function(e) {
-        e.preventDefault();
-
         var xhr = new XMLHttpRequest();
         var Name = this.$.fileInput.files[0].name;
+        var self = this;
         xhr.onreadystatechange = function () {
           if (xhr.readyState === 4) {
             var response = JSON.parse(xhr.responseText);
-            var toast = document.querySelector("#toast");
             if (xhr.status === 200 && response.status === 'OK') {
-              toast.text = "Added " + Name + " to the queue.";
+              self._showNotification("Added " + Name + " to the queue.");
             } else {
-              toast.text = "Failed: " + xhr.responseText;
+              self._showNotification("Failed: " + xhr.responseText);
             }
-            toast.open();
           }
         }
         xhr.open('put', "/api/add/new", true);
@@ -69,6 +62,9 @@
         formData.append("fileTag", this.$.fileTag.value);
         xhr.setRequestHeader("Authorization", this.userInfo.token)
         xhr.send(formData);
+      },
+      _showNotification: function(text) {
+        this.fire("show-notification", {text: text})
       }
     });
   </script>

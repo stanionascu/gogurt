@@ -5,7 +5,6 @@
 <link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
 
 <link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
@@ -47,7 +46,7 @@
           <div main-title>Gogurt</div>
           <paper-icon-button icon="av:play-arrow" on-tap="startOrStopSelected"></paper-icon-button>
           <paper-icon-button icon="delete" on-tap="eraseSelected"></paper-icon-button>
-          <paper-icon-button icon="add" onclick="addDialog.open()"></paper-icon-button>
+          <paper-icon-button icon="add" on-tap="openAddDialog"></paper-icon-button>
         </app-toolbar>
       </app-header>
       <gogurt-list id="list"></gogurt-list>
@@ -59,11 +58,30 @@
   </template>
 
   <script>
+    var toast = undefined;
     Polymer({
       is: 'gogurt-app',
       properties: { userInfo: Object },
+      ready: function(e) {
+        var toast = this.$.toast;
+        var confirmDialog = this.$.confirmDialog;
+        var notificator =  function (e) {
+          toast.text = e.detail.text;
+          toast.open();
+        };
+        this.$.list.addEventListener('show-notification', notificator);
+        this.$.addDialog.addEventListener('show-notification', notificator);
+        this.$.list.addEventListener('show-confirm-dialog', function (e) {
+          confirmDialog.Text = e.detail.text;
+          confirmDialog.open();
+          confirmDialog.dismissDialog = e.detail.action;
+        });
+      },
       initializeEmptyUserInfo: function() {
         this.userInfo = { token: "", loggedIn: false };
+      },
+      openAddDialog: function() {
+        this.$.addDialog.open();
       },
       eraseSelected: function(e) {
         this.$.list.eraseSelected();

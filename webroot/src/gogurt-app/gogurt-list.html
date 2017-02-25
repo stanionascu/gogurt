@@ -1,5 +1,4 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
@@ -8,7 +7,6 @@
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 
 <link rel="import" href="gogurt-app-data.html">
-<link rel="import" href="gogurt-list-body.html">
 
 <dom-module id="gogurt-list">
   <template>
@@ -73,9 +71,9 @@
           <th>Down</th>
         </tr>
       </thead>
-      <tbody is="gogurt-list-body" on-iron-select="_itemSelected">
+      <tbody id="torrents-body">
         <template is="dom-repeat" items="{{itemData}}" as="item">
-        <tr style="width: 100%;">
+        <tr style="width: 100%;" on-tap="_itemSelected" data-index$="{{index}}">
           <td nowrap><span class="title">[[item.Name]]</span></td>
           <td nowrap><paper-progress value="[[_percentage(item.CompletedBytes, item.TotalSizeInBytes)]]"></paper-progress>[[_percentage(item.CompletedBytes, item.TotalSizeInBytes)]]%</td>
           <td nowrap class="align-left">[[_formatSizeUnits(item.CompletedBytes)]]/[[_formatSizeUnits(item.TotalSizeInBytes)]] <iron-icon icon="device:storage"></iron-icon></td>
@@ -94,12 +92,8 @@
         is: "gogurt-list",
         properties: {
           userInfo: Object,
-          selectedIndex: Number
-        },
-        ready: function() {
-          if (this.userInfo && this.userInfo.loggedIn) {
-            this.$.list.generateRequest();
-          }
+          selectedIndex: Number,
+          selectedItem: Object,
         },
         _updateData: function () {
           this.async(function () {
@@ -112,9 +106,7 @@
           this._updateData();
         },
         _onResponseError: function(e) {
-          var toast = document.querySelector("#toast");
-          toast.text = "Error occured while fetching the list";
-          toast.open();
+          this._showNotification("Error occured while fetching the list");
         },
         _formatSizeUnits: function(bytes){
           var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -135,42 +127,52 @@
           return 0;
         },
         eraseSelected: function(e) {
-          var dialog = document.querySelector("#confirmDialog");
-          var toast = document.querySelector("#toast");
+          var dialog = this.$$("#confirmDialog");
           var item = this.itemData[this.selectedIndex];
-          dialog.Text = "Really remove " + item.Name + "?";
-          dialog.open();
-
           var xhr = this.$.itemXhr;
-          dialog.dismissDialog = function(e) {
-            if (e.detail.confirmed) {
-              xhr.method = "DELETE";
-              xhr.url = "/" + item.Hash;
-              xhr.generateRequest();
-              // todo: some error checking
-              toast.text = item.Name + " removed";
-              toast.open();
+          var self = this;
+
+          this._showConfirmDialog("Really remove " + item.Name + "?",
+            function(e) {
+              if (e.detail.confirmed) {
+                xhr.method = "DELETE";
+                xhr.url = "/" + item.Hash;
+                xhr.generateRequest();
+                // todo: some error checking
+                self._showNotification(item.Name + " removed")
+              }
             }
-          }
+          );
         },
         startOrStopSelected: function(e) {
-          var item = this.itemData[this.selectedIndex];
-          var toast = document.querySelector("#toast");
-          var xhr = this.$.itemXhr;
+          let item = this.itemData[this.selectedIndex];
+          let xhr = this.$.itemXhr;
 
           xhr.method = "OPTIONS";
           if (item.State == 1) {
             xhr.url = "/" + item.Hash + "/stop";
-            toast.text = item.Name + " stopped";
+            this._showNotification(item.Name + " stopped")
           } else {
             xhr.url = "/" + item.Hash + "/start";
-            toast.text = item.Name + " started";
+            this._showNotification(item.Name + " started")
           }
           xhr.generateRequest();
-          toast.open();
         },
-        _itemSelected: function(e, detail) {
-          this.selectedIndex = detail.item.rowIndex - 1;
+        _itemSelected: function(e) {
+          var target = e.currentTarget;
+          if (this.selectedItem) {
+            this.selectedItem.className = "";
+          }
+          this.selectedIndex = target.dataset.index;
+          this.selectedItem = target;
+          target.className = "iron-selected";
+          this.updateStyles();
+        },
+        _showNotification: function(text) {
+          this.fire("show-notification", {text: text})
+        },
+        _showConfirmDialog: function(text, action) {
+          this.fire("show-confirm-dialog", {text: text, action: action})
         }
       });
   </script>

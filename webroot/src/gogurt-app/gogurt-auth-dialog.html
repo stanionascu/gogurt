@@ -2,9 +2,7 @@
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
-<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="gogurt-app-data.html">
 
@@ -24,29 +22,26 @@
     <iron-ajax auto method="get" url="/token" handle-as="json"
       headers$='{"Authorization": "[[userInfo.token]]"}'
       on-error="_badToken"></iron-ajax>
-    <form is="iron-form" on-iron-form-response="_responseHandler" on-iron-form-error="_responseError" id="loginForm" method="post" action="/login">
     <paper-dialog id="dialog" modal style="width: 500px; padding: 20px;">
       <h2>Login</h2>
       <template is="dom-if" if="[[error]]">
-          <p class="alert-error"><strong>Error:</strong> [[error]]</p>
+        <p class="alert-error"><strong>Error:</strong> [[error]]</p>
       </template>
       <paper-dialog-scrollable>
-          <paper-input name="login" label="Login" required></paper-input>
-          <paper-input id="password" name="password" label="Password" type="password" required></paper-input>
+        <paper-input id="login" name="login" label="Login" required auto-validate></paper-input>
+        <paper-input id="password" name="password" label="Password" type="password" required auto-validate></paper-input>
       </paper-dialog-scrollable>
       <div class="buttons">
-        <paper-button id="loginButton" autofocus raised>Login</paper-button>
+        <paper-button id="loginButton" autofocus raised on-tap="_submitForm">Login</paper-button>
       </div>
     </paper-dialog>
-    </form>
+    <iron-ajax id="loginXhr" content-type="application/x-www-form-urlencoded"
+      method="post" url="/login" on-error="_loginError" on-response="_checkToken"></iron-ajax>
   </template>
 
   <script>
     Polymer({
       is: 'gogurt-auth-dialog',
-      listeners: {
-        "loginButton.click": "_submitForm",
-      },
       properties: {
         userInfo: Object
       },
@@ -54,7 +49,10 @@
         this.$.dialog.open();
       },
       _submitForm: function(e) {
-        document.getElementById("loginForm").submit();
+        var loginXhr = this.$$("#loginXhr");
+        loginXhr.body = {login: this.$$("#login").value,
+                         password: this.$$("#password").value};
+        this.$$("#loginXhr").generateRequest();
       },
       _badToken: function(e) {
         if (this.userInfo && this.userInfo.token) {
@@ -63,7 +61,7 @@
         }
         this.open();
       },
-      _responseHandler: function(e) {
+      _checkToken: function(e) {
         var response = e.detail.parseResponse();
         if (response.token) {
           var app = document.querySelector("gogurt-app");
@@ -72,7 +70,7 @@
           this.error = "";
         }
       },
-      _responseError: function(e) {
+      _loginError: function(e) {
         this.error = e.detail.request.xhr.response.status;
         this.$.password.value = "";
       },
