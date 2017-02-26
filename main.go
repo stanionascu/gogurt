@@ -53,7 +53,7 @@ func IsTokenValid(tokenHeader string) bool {
 		})
 		if err == nil {
 			if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
-				return claims.Id == "admin" && claims.Issuer == "gogurt"
+				return claims.Id == loginInfo.Username && claims.Issuer == "gogurt"
 			}
 		} else {
 			log.Println("error occured when validating token:", err)
@@ -130,7 +130,7 @@ func Login(c *gin.Context) {
 	if login == loginInfo.Username && pass == loginInfo.Password {
 		claims := &jwt.StandardClaims{
 			ExpiresAt: time.Now().AddDate(0, 0, 1).Unix(),
-			Id:        "admin",
+			Id:        loginInfo.Username,
 			Issuer:    "gogurt",
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -161,12 +161,21 @@ func main() {
 	flag.StringVar(&args.Host, "host", "localhost", "HOST to bind to")
 	flag.StringVar(&args.RPCSock, "rpc", "127.0.0.1:5000", "rtorrent scgi socket")
 	flag.StringVar(&loginInfo.Username, "username", "admin", "Username used for logging in")
-	flag.StringVar(&loginInfo.Password, "password", string(RandKey(10)), "Password used for logging in")
+	flag.StringVar(&loginInfo.Password, "password", "random", "Password used for logging in")
+	cmdJwtKey := flag.String("jwt-key", "random", "JWT key used for signing the tokens")
 	flag.Parse()
 
 	// generate random key
-	jwtSigningKey = RandKey(20)
-	log.Println("JWT key generated...")
+	if *cmdJwtKey == "random" {
+		jwtSigningKey = RandKey(20)
+		log.Println("JWT key generated...")
+	} else {
+		jwtSigningKey = []byte(*cmdJwtKey)
+	}
+
+	if loginInfo.Password == "random" {
+		loginInfo.Password = string(RandKey(10))
+	}
 	log.Println("Username:", loginInfo.Username)
 	log.Println("Passowrd:", loginInfo.Password)
 
