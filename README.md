@@ -6,6 +6,20 @@ Uses JWT for authentication, and will generate a new key (and password) on each 
 
 The **server** part only serves the webresources and acts as a REST server, which allows to implement any WebUI/control apps/scripts on top.
 
+## Screenshots
+
+Login dialog:
+
+![Login](imgs/gogurt_login.png)
+
+Adding a torrent into the queue:
+
+![Add](imgs/gogurt_add.png)
+
+Overview:
+
+![Overview](imgs/gogurt_started.png)
+
 ## Dependencies:
 
 - For JWT [github.com/dgrijalva/jwt-go](https://github.com/dgrijalva/jwt-go)
@@ -42,7 +56,7 @@ For connecting to rtorrent via local unix socket simply specify the path to -rpc
 
 ## TODO:
 
-- [ ] Add screenshots to README
+- [X] Add screenshots to README
 - [ ] Support config file and bundled polymer resources
 - [ ] Support SSL
 - [ ] Add config wizard?
