@@ -6,8 +6,6 @@
 <link rel="import" href="../../bower_components/iron-icons/notification-icons.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 
-<link rel="import" href="gogurt-app-data.html">
-
 <dom-module id="gogurt-list">
   <template>
     <style is="custom-style">
@@ -48,8 +46,7 @@
         background: #eee;
       }
     </style>
-    <gogurt-app-data key="userInfoData" data="{{userInfo}}"></gogurt-app-data>
-    <iron-ajax auto id="list" url="/api/list/main" last-response="{{itemData}}" 
+    <iron-ajax auto id="list" url="/api/list/main" last-response="{{itemData}}"
         on-response="_onResponse" on-error="_onResponseError" handleAs="json"
         headers$='{"Authorization": "[[userInfo.token]]"}'></iron-ajax>
     <table id="torrents" cellspacing=0>
@@ -127,7 +124,6 @@
           return 0;
         },
         eraseSelected: function(e) {
-          var dialog = this.$$("#confirmDialog");
           var item = this.itemData[this.selectedIndex];
           var xhr = this.$.itemXhr;
           var self = this;

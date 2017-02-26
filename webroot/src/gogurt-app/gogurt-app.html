@@ -18,7 +18,6 @@
 <link rel="import" href="gogurt-add-dialog.html">
 <link rel="import" href="gogurt-confirm-dialog.html">
 <link rel="import" href="gogurt-auth-dialog.html">
-<link rel="import" href="gogurt-app-data.html">
 
 <dom-module id="gogurt-app">
   <template>
@@ -39,8 +38,7 @@
       }
     </style>
     <iron-localstorage name="userInfoStorage" value="{{userInfo}}" on-iron-localstorage-load-empty="initializeEmptyUserInfo"></iron-localstorage>
-    <gogurt-app-data key="userInfoData" data="{{userInfo}}"></gogurt-app-data>
-    <div hidden$="[[!userInfo.loggedIn]]">
+    <template is="dom-if" if="[[userInfo.loggedIn]]">
       <app-header reveals effects="waterfall">
         <app-toolbar>
           <div main-title>Gogurt</div>
@@ -49,11 +47,12 @@
           <paper-icon-button icon="add" on-tap="openAddDialog"></paper-icon-button>
         </app-toolbar>
       </app-header>
-      <gogurt-list id="list"></gogurt-list>
-      <gogurt-add-dialog id="addDialog"></gogurt-add-dialog>
+      <gogurt-list id="list" view-name="[[viewName]]" on-show-notification="displayToast" on-show-confirm-dialog="displayConfirmDialog"
+        user-info="[[userInfo]]"></gogurt-list>
+      <gogurt-add-dialog id="addDialog" on-show-notification="displayToast" user-info="[[userInfo]]"></gogurt-add-dialog>
       <gogurt-confirm-dialog id="confirmDialog"></gogurt-confirm-dialog>
-    </div>
-    <gogurt-auth-dialog id="authDialog"></gogurt-auth-dialog>
+    </template>
+    <gogurt-auth-dialog id="authDialog" user-info="{{userInfo}}"></gogurt-auth-dialog>
     <paper-toast id="toast" text="Added successfuly to the queue."></paper-toast>
   </template>
 
@@ -61,7 +60,9 @@
     var toast = undefined;
     Polymer({
       is: 'gogurt-app',
-      properties: { userInfo: Object },
+      properties: {
+        userInfo: Object,
+      },
       ready: function(e) {
         var toast = this.$.toast;
         var confirmDialog = this.$.confirmDialog;
@@ -69,26 +70,30 @@
           toast.text = e.detail.text;
           toast.open();
         };
-        this.$.list.addEventListener('show-notification', notificator);
-        this.$.addDialog.addEventListener('show-notification', notificator);
-        this.$.list.addEventListener('show-confirm-dialog', function (e) {
-          confirmDialog.Text = e.detail.text;
-          confirmDialog.open();
-          confirmDialog.dismissDialog = e.detail.action;
-        });
       },
       initializeEmptyUserInfo: function() {
         this.userInfo = { token: "", loggedIn: false };
       },
-      openAddDialog: function() {
-        this.$.addDialog.open();
+      openAddDialog: function(e) {
+        this.$$("#addDialog").open();
       },
       eraseSelected: function(e) {
-        this.$.list.eraseSelected();
+        this.$$("#list").eraseSelected();
       },
       startOrStopSelected: function(e) {
-        this.$.list.startOrStopSelected();
-      }
+        this.$$("#list").startOrStopSelected();
+      },
+      displayToast: function(e) {
+        let toast = this.$.toast;
+        toast.text = e.detail.text;
+        toast.open();
+      },
+      displayConfirmDialog: function(e) {
+        let confirmDialog = this.$$("#confirmDialog");
+        confirmDialog.Text = e.detail.text;
+        confirmDialog.open();
+        confirmDialog.dismissDialog = e.detail.action;
+      },
     });
   </script>
 

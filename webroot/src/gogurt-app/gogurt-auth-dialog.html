@@ -4,8 +4,6 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 
-<link rel="import" href="gogurt-app-data.html">
-
 <dom-module id="gogurt-auth-dialog">
   <template>
     <style>
@@ -18,7 +16,6 @@
         padding: 10px;
       }
     </style>
-    <gogurt-app-data key="userInfoData" data="{{userInfo}}"></gogurt-app-data>
     <iron-ajax auto method="get" url="/token" handle-as="json"
       headers$='{"Authorization": "[[userInfo.token]]"}'
       on-error="_badToken"></iron-ajax>
