@@ -14,7 +14,8 @@ import (
 	"./scgi"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/gzip"
+	"gopkg.in/gin-gonic/gin.v1"
 )
 
 type CommandLineArgs struct {
@@ -180,6 +181,7 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Use(gzip.Gzip(gzip.BestSpeed))
 	router.StaticFS("/ui/", http.Dir("webroot/"))
 
 	router.GET("/", Index)
