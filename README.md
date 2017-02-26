@@ -38,6 +38,8 @@ Usage of ./gogurt:
         Username used for logging in (default "admin")
 ```
 
+For connecting to rtorrent via local unix socket simply specify the path to -rpc as e.g. `/tmp/rtorrent.sock`
+
 ## TODO:
 
 - [ ] Add screenshots to README
