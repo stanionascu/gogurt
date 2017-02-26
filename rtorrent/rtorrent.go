@@ -46,9 +46,9 @@ func Client(transport http.RoundTripper) (c *RtClient, err error) {
 	return
 }
 
-func (rt *RtClient) GetList() (items []Torrent, err error) {
+func (rt *RtClient) GetList(viewName string) (items []Torrent, err error) {
 	var result []interface{}
-	args := []string{"main",
+	args := []string{viewName,
 		"d.name=",
 		"d.hash=",
 		"d.size_bytes=",

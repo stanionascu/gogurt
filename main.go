@@ -70,7 +70,7 @@ func ReplyCheckError(c *gin.Context, err error) {
 }
 
 func List(c *gin.Context) {
-	torrents, _ := rtConn.GetList()
+	torrents, _ := rtConn.GetList(c.Param("view"))
 	c.JSON(http.StatusOK, torrents)
 }
 
