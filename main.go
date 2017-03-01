@@ -84,7 +84,7 @@ func AddNew(c *gin.Context) {
 	if err == nil {
 		fileData, fileErr := ioutil.ReadAll(file)
 		if fileErr == nil {
-			location := c.PostForm("fileLocation")
+			location := c.PostForm("fileTag")
 			err = rtConn.LoadRaw(fileData, location)
 		} else {
 			err = fileErr
