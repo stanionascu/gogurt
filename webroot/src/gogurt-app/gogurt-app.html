@@ -3,6 +3,7 @@
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-icons/av-icons.html">
 <link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-styles/typography.html">
@@ -41,7 +42,7 @@
     <template is="dom-if" if="[[userInfo.loggedIn]]">
       <app-header reveals effects="waterfall">
         <app-toolbar>
-          <div main-title>Gogurt</div>
+          <div main-title>Gogurt ([[_formatSizeUnits(info.space.free)]] free)</div>
           <paper-icon-button icon="av:play-arrow" on-tap="startOrStopSelected"></paper-icon-button>
           <paper-icon-button icon="delete" on-tap="eraseSelected"></paper-icon-button>
           <paper-icon-button icon="add" on-tap="openAddDialog"></paper-icon-button>
@@ -54,6 +55,8 @@
     </template>
     <gogurt-auth-dialog id="authDialog" user-info="{{userInfo}}"></gogurt-auth-dialog>
     <paper-toast id="toast" text="Added successfuly to the queue."></paper-toast>
+    <iron-ajax auto id="infoXhr" url="/api/serverinfo" last-response="{{info}}" handleAs="json"
+            headers$='{"Authorization": "[[userInfo.token]]"}'></iron-ajax>
   </template>
 
   <script>
@@ -62,6 +65,10 @@
       is: 'gogurt-app',
       properties: {
         userInfo: Object,
+        info: {
+          type: Object,
+          value: { space: { free: 0, total: 0 } }
+        }
       },
       ready: function(e) {
         var toast = this.$.toast;
@@ -94,6 +101,9 @@
         confirmDialog.open();
         confirmDialog.dismissDialog = e.detail.action;
       },
+      _formatSizeUnits: function(bytes) {
+        return _formatSizeUnits(bytes)
+      }
     });
   </script>
 

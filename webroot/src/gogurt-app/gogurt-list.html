@@ -105,13 +105,8 @@
         _onResponseError: function(e) {
           this._showNotification("Error occured while fetching the list");
         },
-        _formatSizeUnits: function(bytes){
-          var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-          if (bytes == 0) {
-            return '0 B';
-          }
-          var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-          return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+        _formatSizeUnits: function(bytes) {
+          return _formatSizeUnits(bytes)
         },
         _percentage: function(value, total) {
           return ((value/total) * 100.0).toFixed(2);

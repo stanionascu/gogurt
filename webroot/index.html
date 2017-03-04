@@ -26,6 +26,16 @@
         background-color: #eeeeee;
       }
     </style>
+    <script>
+      function _formatSizeUnits(bytes) {
+          let sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+          if (bytes == 0) {
+            return '0 B';
+          }
+          let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+          return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+      }
+    </script>
   </head>
   <body>
     <gogurt-app></gogurt-app>

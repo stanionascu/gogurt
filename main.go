@@ -154,6 +154,11 @@ func Token(c *gin.Context) {
 	}
 }
 
+func ServerInfo(c *gin.Context) {
+	free, total := GetDiskSpace()
+	c.JSON(http.StatusOK, gin.H{"space": gin.H{"free": free, "total": total}})
+}
+
 func main() {
 	rand.Seed(time.Now().Unix())
 	args := CommandLineArgs{}
@@ -202,6 +207,7 @@ func main() {
 		router.PUT("/api/add/new", Protected(AddNew))
 		router.DELETE("/:hash", Protected(Delete))
 		router.OPTIONS("/:hash/:action", Protected(DoAction))
+		router.GET("/api/serverinfo", Protected(ServerInfo))
 	}
 
 	hostToBind := fmt.Sprintf("%s:%d", args.Host, args.Port)
