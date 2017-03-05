@@ -43,7 +43,7 @@ Usage of ./gogurt:
   -host string
         HOST to bind to (default "localhost")
   -password string
-        Password used for logging in (default "random")
+        Password used for logging in, omit for password-less login
   -port uint
         PORT to listen on (default 9999)
   -rpc string

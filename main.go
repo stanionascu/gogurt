@@ -43,7 +43,10 @@ func RandKey(n int) (b []byte) {
 	return
 }
 
-func IsTokenValid(tokenHeader string) bool {
+func ValidateToken(tokenHeader string) bool {
+	if len(loginInfo.Password) == 0 {
+		return true
+	}
 	if len(tokenHeader) > 0 {
 		token, err := jwt.ParseWithClaims(tokenHeader, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -116,7 +119,7 @@ func Delete(c *gin.Context) {
 func Protected(handler gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authToken := c.Request.Header.Get("Authorization")
-		if IsTokenValid(authToken) {
+		if ValidateToken(authToken) {
 			handler(c)
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"status": "invalid authorization"})
@@ -147,7 +150,7 @@ func Login(c *gin.Context) {
 
 func Token(c *gin.Context) {
 	authToken := c.Request.Header.Get("Authorization")
-	if IsTokenValid(authToken) {
+	if ValidateToken(authToken) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK"})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"status": "missing or expired authorization"})
@@ -166,23 +169,25 @@ func main() {
 	flag.StringVar(&args.Host, "host", "localhost", "HOST to bind to")
 	flag.StringVar(&args.RPCSock, "rpc", "127.0.0.1:5000", "rtorrent scgi socket")
 	flag.StringVar(&loginInfo.Username, "username", "admin", "Username used for logging in")
-	flag.StringVar(&loginInfo.Password, "password", "random", "Password used for logging in")
+	flag.StringVar(&loginInfo.Password, "password", "", "Password used for logging in, omit for password-less login")
 	cmdJwtKey := flag.String("jwt-key", "random", "JWT key used for signing the tokens")
 	flag.Parse()
 
 	// generate random key
-	if *cmdJwtKey == "random" {
-		jwtSigningKey = RandKey(20)
-		log.Println("JWT key generated...")
-	} else {
-		jwtSigningKey = []byte(*cmdJwtKey)
-	}
+	if len(loginInfo.Password) > 0 {
+		if *cmdJwtKey == "random" {
+			jwtSigningKey = RandKey(20)
+			log.Println("JWT key generated...")
+		} else {
+			jwtSigningKey = []byte(*cmdJwtKey)
+		}
 
-	if loginInfo.Password == "random" {
-		loginInfo.Password = string(RandKey(10))
+		if loginInfo.Password == "random" {
+			loginInfo.Password = string(RandKey(10))
+		}
+		log.Println("Username:", loginInfo.Username)
+		log.Println("Passowrd:", loginInfo.Password)
 	}
-	log.Println("Username:", loginInfo.Username)
-	log.Println("Passowrd:", loginInfo.Password)
 
 	var rtErr error
 	rtNetwork := "tcp"
