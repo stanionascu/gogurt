@@ -13,8 +13,6 @@ func GetDiskSpace() (free uint64, total uint64) {
 
 	cwd, _ := os.Getwd()
 
-	log.Println(cwd)
-
 	_, _, err := c.Call(
 		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(cwd))),
 		uintptr(unsafe.Pointer(&free)),
