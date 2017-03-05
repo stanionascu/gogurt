@@ -18,6 +18,7 @@
     </style>
     <iron-ajax auto method="get" url="/token" handle-as="json"
       headers$='{"Authorization": "[[userInfo.token]]"}'
+      on-response="_validToken"
       on-error="_badToken"></iron-ajax>
     <paper-dialog id="dialog" modal style="width: 500px; padding: 20px;">
       <h2>Login</h2>
@@ -66,6 +67,10 @@
           this.$.dialog.close();
           this.error = "";
         }
+      },
+      _validToken: function(e) {
+        let app = document.querySelector("gogurt-app");
+        app.set("userInfo.loggedIn", true);
       },
       _loginError: function(e) {
         this.error = e.detail.request.xhr.response.status;
