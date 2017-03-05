@@ -42,6 +42,8 @@ In **webroot**:
 Usage of ./gogurt:
   -host string
         HOST to bind to (default "localhost")
+  -jwt-key string
+        JWT key used for signing the tokens (default "random")
   -password string
         Password used for logging in, omit for password-less login
   -port uint
