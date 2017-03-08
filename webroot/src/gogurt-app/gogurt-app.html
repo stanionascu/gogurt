@@ -19,6 +19,7 @@
 <link rel="import" href="gogurt-add-dialog.html">
 <link rel="import" href="gogurt-confirm-dialog.html">
 <link rel="import" href="gogurt-auth-dialog.html">
+<link rel="import" href="gogurt-info-dialog.html">
 
 <dom-module id="gogurt-app">
   <template>
@@ -43,6 +44,7 @@
       <app-header reveals effects="waterfall">
         <app-toolbar>
           <div main-title>Gogurt ([[_formatSizeUnits(info.space.free)]] free)</div>
+          <paper-icon-button icon="info" on-tap="openInfoDialog"></paper-icon-button>
           <paper-icon-button icon="av:play-arrow" on-tap="startOrStopSelected"></paper-icon-button>
           <paper-icon-button icon="delete" on-tap="eraseSelected"></paper-icon-button>
           <paper-icon-button icon="add" on-tap="openAddDialog"></paper-icon-button>
@@ -52,6 +54,7 @@
         user-info="[[userInfo]]"></gogurt-list>
       <gogurt-add-dialog id="addDialog" on-show-notification="displayToast" user-info="[[userInfo]]"></gogurt-add-dialog>
       <gogurt-confirm-dialog id="confirmDialog"></gogurt-confirm-dialog>
+      <gogurt-info-dialog id="infoDialog" user-info="[[userInfo]]" on-show-notification="displayToast"></gogurt-info-dialog>
     </template>
     <gogurt-auth-dialog id="authDialog" user-info="{{userInfo}}"></gogurt-auth-dialog>
     <paper-toast id="toast" text="Added successfuly to the queue."></paper-toast>
@@ -83,6 +86,14 @@
       },
       openAddDialog: function(e) {
         this.$$("#addDialog").open();
+      },
+      openInfoDialog: function(e) {
+        let dialog = this.$$("#infoDialog")
+        let list = this.$$("#list")
+        if (list.selectedIndex) {
+          dialog.item = list.itemData[list.selectedIndex]
+          dialog.open();
+        }
       },
       eraseSelected: function(e) {
         this.$$("#list").eraseSelected();

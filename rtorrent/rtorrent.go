@@ -25,6 +25,12 @@ type Torrent struct {
 	TotalUploadedBytes int64
 }
 
+type TorrentFile struct {
+	Name     string
+	Priority int8
+	Size     int64
+}
+
 type ViewType string
 
 func (rt *RtClient) Call(method string, args interface{}, reply interface{}) (err error) {
@@ -106,5 +112,42 @@ func (rt *RtClient) LoadRaw(data []byte, tag string) (err error) {
 		args = append(args, fmt.Sprintf("d.custom1.set=%s/", tag))
 	}
 	err = rt.Call("load.raw_verbose", args, &result)
+	return
+}
+
+func (rt *RtClient) GetFiles(hash string) (files []TorrentFile, err error) {
+	var result []interface{}
+	args := []interface{}{hash,
+		"",
+		"f.path=",
+		"f.priority=",
+		"f.size_bytes=",
+	}
+
+	err = rt.Call("f.multicall", args, &result)
+	if err == nil {
+		for _, item := range result {
+			var file TorrentFile
+			array := item.([]interface{})
+			file.Name = array[0].(string)
+			file.Priority = int8(array[1].(int64))
+			file.Size = array[2].(int64)
+
+			files = append(files, file)
+		}
+	}
+	return
+}
+
+func (rt *RtClient) SetPriority(hash string, index int, prio int) (err error) {
+	var result int
+	args := []interface{}{hash, index, prio}
+	err = rt.Call("f.set_priority", args, &result)
+	return
+}
+
+func (rt *RtClient) UpdatePriorities(hash string) (err error) {
+	var result int
+	err = rt.Call("d.update_priorities", hash, &result)
 	return
 }

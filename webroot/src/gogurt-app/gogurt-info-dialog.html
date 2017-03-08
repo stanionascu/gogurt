@@ -1,0 +1,76 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="gogurt-info-dialog">
+  <template>
+    <paper-dialog id="dialog" modal style="padding: 20px;" auto-fit-on-attach>
+      <h2>Info about [[item.Name]]</h2>
+      <table style="width: 100%; background: lightgray;">
+        <colgroup>
+          <col width="100%"/>
+          <col width="250px"/>
+          <col width="100px"/>
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Size</th>
+            <th>Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+        <template is="dom-repeat" items="{{itemDetails}}" as="file">
+          <tr>
+            <td nowrap>[[file.Name]]</td>
+            <td nowrap>[[_formatSizeUnits(file.Size)]]</td>
+            <td>
+              <paper-slider data-index$="{{index}}" value="{{file.Priority}}" min=0 max=2 style="width: 100px;"></paper-slider>
+            </td>
+          </tr>
+        </template>
+        </tbody>
+      </table>
+      <div class="buttons">
+        <paper-button dialog-dismiss autofocus>Close</paper-button>
+        <paper-button dialog-confirm on-tap="_saveChanges">Save</paper-button>
+      </div>
+    </paper-dialog>
+    <iron-ajax id="detailsXhr" method="get" url$="/details/[[item.Hash]]" handle-as="json"
+      headers$='{"Authorization": "[[userInfo.token]]"}'
+      last-response="{{itemDetails}}" on-response="_openDialog"></iron-ajax>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'gogurt-info-dialog',
+      properties: {
+        item: Object,
+        itemDetails: Object
+      },
+      open: function(e) {
+        this.$.detailsXhr.generateRequest();
+      },
+      _openDialog: function(e) {
+        this.$.dialog.open();
+      },
+      _formatSizeUnits: function(bytes) {
+        return _formatSizeUnits(bytes);
+      },
+      _saveChanges: function(e) {
+        let changes = new Array;
+        for (let item of this.itemDetails) {
+          changes.push(item.Priority);
+        }
+        let xhr = new XMLHttpRequest
+        xhr.open("OPTIONS", "/" + this.item.Hash + "/priorities");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        let data = new FormData;
+        xhr.send(JSON.stringify(changes));
+        this.fire("show-notification", {text: "Changes saved"})
+      }
+    });
+  </script>
+</dom-module>

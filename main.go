@@ -106,6 +106,16 @@ func DoAction(c *gin.Context) {
 		err = rtConn.Start(hash)
 	case "stop":
 		err = rtConn.Stop(hash)
+	case "priorities":
+		var prios []int
+		c.BindJSON(&prios)
+		for index, prio := range prios {
+			err = rtConn.SetPriority(hash, index, prio)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		err = rtConn.UpdatePriorities(hash)
 	}
 	ReplyCheckError(c, err)
 }
@@ -162,6 +172,16 @@ func ServerInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"space": gin.H{"free": free, "total": total}})
 }
 
+func Details(c *gin.Context) {
+	hash := c.Param("hash")
+	files, err := rtConn.GetFiles(hash)
+	if err == nil {
+		c.JSON(http.StatusOK, files)
+	} else {
+		c.JSON(http.StatusInternalServerError, err)
+	}
+}
+
 func main() {
 	rand.Seed(time.Now().Unix())
 	args := CommandLineArgs{}
@@ -213,6 +233,7 @@ func main() {
 		router.DELETE("/:hash", Protected(Delete))
 		router.OPTIONS("/:hash/:action", Protected(DoAction))
 		router.GET("/api/serverinfo", Protected(ServerInfo))
+		router.GET("/details/:hash", Protected(Details))
 	}
 
 	hostToBind := fmt.Sprintf("%s:%d", args.Host, args.Port)
