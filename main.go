@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"./rtorrent"
@@ -184,6 +185,8 @@ func Details(c *gin.Context) {
 
 func main() {
 	rand.Seed(time.Now().Unix())
+
+	binPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	args := CommandLineArgs{}
 	flag.UintVar(&args.Port, "port", 9999, "PORT to listen on")
 	flag.StringVar(&args.Host, "host", "localhost", "HOST to bind to")
@@ -219,9 +222,10 @@ func main() {
 		log.Fatalln(rtErr)
 	}
 
+	wwwPath := binPath + "/webroot/"
 	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.BestSpeed))
-	router.StaticFS("/ui/", http.Dir("webroot/"))
+	router.StaticFS("/ui/", http.Dir(wwwPath))
 
 	router.GET("/", Index)
 
