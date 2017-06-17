@@ -31,7 +31,21 @@ type TorrentFile struct {
 	Size     int64
 }
 
+type TorrentFilesByName []TorrentFile
+
 type ViewType string
+
+func (f TorrentFilesByName) Len() int {
+	return len(f)
+}
+
+func (f TorrentFilesByName) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+
+func (f TorrentFilesByName) Less(i, j int) bool {
+	return f[i].Name < f[j].Name
+}
 
 func (rt *RtClient) Call(method string, args interface{}, reply interface{}) (err error) {
 	err = rt.Client.Call(method, args, reply)

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"./rtorrent"
@@ -177,6 +178,7 @@ func Details(c *gin.Context) {
 	hash := c.Param("hash")
 	files, err := rtConn.GetFiles(hash)
 	if err == nil {
+		sort.Sort(rtorrent.TorrentFilesByName(files))
 		c.JSON(http.StatusOK, files)
 	} else {
 		c.JSON(http.StatusInternalServerError, err)
