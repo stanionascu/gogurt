@@ -16,7 +16,6 @@ import (
 	"./scgi"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gin-contrib/gzip"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -226,7 +225,6 @@ func main() {
 
 	wwwPath := binPath + "/webroot/"
 	router := gin.Default()
-	router.Use(gzip.Gzip(gzip.BestSpeed))
 	router.StaticFS("/ui/", http.Dir(wwwPath))
 
 	router.GET("/", Index)
