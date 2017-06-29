@@ -9,8 +9,9 @@
   <template>
     <paper-dialog id="dialog" modal style="padding: 20px;" auto-fit-on-attach>
       <h2>Info about [[item.Name]]</h2>
-      <paper-input label="Location" readonly value="{{itemDetails.location}}"></paper-input>
       <paper-dialog-scrollable>
+      <paper-input label="Location" readonly value="{{itemDetails.location}}"></paper-input>
+      <paper-input label="Tags" readonly value="{{itemDetails.tags}}"></paper-input>
       <table style="width: 100%; background: lightgray;">
         <colgroup>
           <col width="100%"/>

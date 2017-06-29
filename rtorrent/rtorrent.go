@@ -170,3 +170,8 @@ func (rt *RtClient) GetDirectory(hash string) (location string, err error) {
 	err = rt.Call("d.directory", hash, &location)
 	return
 }
+
+func (rt *RtClient) GetTags(hash string) (tag string, err error) {
+	err = rt.Call("d.custom1", hash, &tag)
+	return
+}

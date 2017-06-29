@@ -175,11 +175,13 @@ func ServerInfo(c *gin.Context) {
 
 func Details(c *gin.Context) {
 	hash := c.Param("hash")
+	// reduce calls to a multicall
 	location, err := rtConn.GetDirectory(hash)
 	files, err := rtConn.GetFiles(hash)
+	tags, err := rtConn.GetTags(hash)
 	if err == nil {
 		sort.Sort(rtorrent.TorrentFilesByName(files))
-		c.JSON(http.StatusOK, gin.H{"files": files, "location": location})
+		c.JSON(http.StatusOK, gin.H{"files": files, "location": location, "tags": tags})
 	} else {
 		c.JSON(http.StatusInternalServerError, err)
 	}
