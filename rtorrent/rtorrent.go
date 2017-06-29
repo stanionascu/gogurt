@@ -116,7 +116,7 @@ func (rt *RtClient) Start(hash string) (err error) {
 	return
 }
 
-func (rt *RtClient) LoadRaw(data []byte, tag string) (err error) {
+func (rt *RtClient) LoadRaw(data []byte, tag string, destination string) (err error) {
 	var result int8
 	args := []interface{}{
 		"",
@@ -124,6 +124,9 @@ func (rt *RtClient) LoadRaw(data []byte, tag string) (err error) {
 	}
 	if len(tag) > 0 {
 		args = append(args, fmt.Sprintf("d.custom1.set=%s/", tag))
+	}
+	if len(destination) > 0 {
+		args = append(args, fmt.Sprintf("d.directory.set=%s/", destination))
 	}
 	err = rt.Call("load.raw_verbose", args, &result)
 	return

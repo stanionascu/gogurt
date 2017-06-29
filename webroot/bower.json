@@ -29,6 +29,7 @@
     "paper-listbox": "PolymerElements/paper-listbox#2.0",
     "paper-item": "PolymerElements/paper-item#2.0",
     "paper-slider": "PolymerElements/paper-slider#2.0",
-    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0"
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.1.0",
+    "iron-label": "^2.0.0"
   }
 }

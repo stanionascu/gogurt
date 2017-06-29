@@ -10,6 +10,7 @@
       <paper-dialog-scrollable>
         <input type="file" id="fileInput" on-change="fileChange" hidden>
         <paper-input id="fileDisplay" label="File" readonly on-tap="_selectFile"></paper-input>
+        <paper-input id="destinationDir" label="Destination Directory"></paper-input>
         <paper-input id="fileTag" label="Tag"></paper-input>
       </paper-dialog-scrollable>
       <div class="buttons">
@@ -56,8 +57,9 @@
         xhr.open('put', "/api/add/new", true);
         var formData = new FormData();
         formData.append("fileInput", this.$.fileInput.files[0]);
-        formData.append("fileTag", this.$.fileTag.value);
-        xhr.setRequestHeader("Authorization", this.userInfo.token)
+        formData.append("fileTag", this.$.fileTag.value || "");
+        formData.append("destinationDir", this.$.destinationDir.value || "");
+        xhr.setRequestHeader("Authorization", this.userInfo.token);
         xhr.send(formData);
       },
       _showNotification: function(text) {
