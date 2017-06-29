@@ -175,10 +175,11 @@ func ServerInfo(c *gin.Context) {
 
 func Details(c *gin.Context) {
 	hash := c.Param("hash")
+	location, err := rtConn.GetDirectory(hash)
 	files, err := rtConn.GetFiles(hash)
 	if err == nil {
 		sort.Sort(rtorrent.TorrentFilesByName(files))
-		c.JSON(http.StatusOK, files)
+		c.JSON(http.StatusOK, gin.H{"files": files, "location": location})
 	} else {
 		c.JSON(http.StatusInternalServerError, err)
 	}

@@ -165,3 +165,8 @@ func (rt *RtClient) UpdatePriorities(hash string) (err error) {
 	err = rt.Call("d.update_priorities", hash, &result)
 	return
 }
+
+func (rt *RtClient) GetDirectory(hash string) (location string, err error) {
+	err = rt.Call("d.directory", hash, &location)
+	return
+}
